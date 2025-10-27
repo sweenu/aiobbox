@@ -1,0 +1,99 @@
+[project]
+name = "aiobbox"
+version = "0.1.0"
+description = "Async Python API wrapper for Bouygues Telecom routers"
+readme = "README.md"
+requires-python = ">=3.13"
+license = "Apache-2.0"
+keywords = ["bbox", "bouygues", "router", "api", "async"]
+authors = [
+    {name = "Sweenu", email = "contact@sweenu.xyz"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Home Automation",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "aiohttp>=3.9.0",
+    "pydantic>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/sweenu/aiobbox"
+Documentation = "https://github.com/sweenu/aiobbox#readme"
+Repository = "https://github.com/sweenu/aiobbox"
+Issues = "https://github.com/sweenu/aiobbox/issues"
+
+[build-system]
+requires = ["uv_build>=0.8.19,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.1.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=7.0.0",
+    "pytest-asyncio>=1.2.0",
+    "pre-commit>=3.0.0",
+    "mypy>=1.0.0",
+]
+
+[tool.uv.build-backend]
+module-root = "."
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+ignore = ["E501", "B008", "C901"]
+select = ["E", "W", "F", "I", "B", "C4", "UP"]
+unfixable = ["F401", "F841"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["aiobbox"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "asyncio: mark test as asyncio test",
+]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = [
+    "aiohttp.*",
+    "pydantic.*",
+]
+ignore_missing_imports = true
