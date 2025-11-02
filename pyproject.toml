@@ -43,6 +43,7 @@ dev = [
     "pytest-asyncio>=1.2.0",
     "pre-commit>=3.0.0",
     "mypy>=1.0.0",
+    "commitizen>=4.9.1",
 ]
 
 [tool.uv.build-backend]
@@ -97,3 +98,16 @@ module = [
     "pydantic.*",
 ]
 ignore_missing_imports = true
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version_provider = "uv"
+version_files = [
+    "aiobbox/__init__.py:__version__",
+    "flake.nix:version"
+]
+tag_format = "v$version"
+update_changelog_on_bump = false
+annotated_tag = true
+gpg_sign = true
+bump_message = "release: $new_version"
