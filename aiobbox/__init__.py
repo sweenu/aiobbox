@@ -1,6 +1,6 @@
 """Async Python API wrapper for Bouygues Telecom routers."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .client import BboxApi, BboxApiError, BboxAuthError
 from .models import (
