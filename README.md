@@ -49,5 +49,5 @@ uv run pytest
 uv run pre-commit run --all-files
 
 # Run integration tests
-BBOX_PASSWORD=your_password uv run pytest tests/integration.py -v -s
+BBOX_PASSWORD=your_password uv run pytest tests/integration.py -vvs --no-cov
 ```

@@ -1,265 +1,219 @@
-from datetime import datetime
+"""Tests for Pydantic models."""
+
+from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from aiobbox.models import Host, Router, WANIPStats, WANStats
 
 
-class TestModels:
-    @pytest.fixture
-    def sample_device_data(self) -> dict:
-        """Fixture providing sample device data."""
-        return {
-            "now": "2025-10-27T21:14:33+0100",
+class TestRouterModel:
+    """Test suite for Router model."""
+
+    def test_router_creation(self, sample_device_data: dict[str, Any]) -> None:
+        """Test creating a Router instance from sample data."""
+        router = Router(**sample_device_data["device"])
+        assert router.modelname == "TestRouter3000"
+        assert router.serialnumber == "123456789012345"
+        assert router.numberofboots == 42
+        assert router.uptime == 4043471
+        assert router.using.ftth is True
+        assert router.using.adsl is False
+
+    def test_router_display(self, sample_device_data: dict[str, Any]) -> None:
+        """Test router display settings."""
+        router = Router(**sample_device_data["device"])
+        assert router.display.luminosity == 2
+        assert router.display.luminosity_extender == 100
+        assert router.display.state == "."
+
+    def test_router_versions(self, sample_device_data: dict[str, Any]) -> None:
+        """Test router version information."""
+        router = Router(**sample_device_data["device"])
+        assert router.main.version == "1.0.0"
+        assert router.running.version == "1.0.0"
+        assert router.spl.version is None  # Empty string converted to None
+
+    def test_router_empty_string_to_none(self) -> None:
+        """Test that empty strings are converted to None."""
+        data = {
+            "now": "2025-11-07T13:40:00+0100",
             "status": 1,
             "numberofboots": 10,
-            "modelname": "F@st5696b",
-            "modelclass": "F5696b",
+            "modelname": "Test",
+            "modelclass": "Test",
             "optimisation": 1,
             "user_configured": 1,
-            "serialnumber": "123456789012345",
-            "display": {
-                "luminosity": 2,
-                "luminosity_extender": 100,
-                "state": ".",
-            },
-            "main": {"version": "25.5.28", "date": "2025-09-25T14:38:50Z"},
-            "reco": {"version": "25.5.28", "date": "2025-09-25T14:29:16Z"},
-            "running": {
-                "version": "25.5.28",
-                "date": "2025-09-25T14:38:16+0000",
-            },
+            "serialnumber": "123",
+            "display": {"luminosity": 0, "luminosity_extender": 0, "state": "."},
+            "main": {"version": ""},
+            "reco": {"version": ""},
+            "running": {"version": ""},
             "spl": {"version": ""},
             "tpl": {"version": ""},
-            "ldr1": {"version": "4.4.20"},
-            "ldr2": {"version": "4.4.20"},
-            "firstusedate": "2025-07-23T06:30:42Z",
-            "uptime": 404347,
+            "ldr1": {"version": ""},
+            "ldr2": {"version": ""},
+            "firstusedate": "2024-06-01T08:00:00Z",
+            "uptime": 0,
             "lastFactoryReset": 0,
             "using": {"ipv4": 1, "ipv6": 1, "ftth": 1, "adsl": 0, "vdsl": 0},
-            "isCellularEnable": 1,
-            "newihm": 1,
-            "newihmCdc": 1,
+            "isCertified": 1,
         }
 
-    @pytest.fixture
-    def sample_host_data(self) -> dict:
-        """Fixture providing complete sample host data."""
-        return {
-            "id": 1,
-            "active": 1,
-            "devicetype": "wifi",
-            "duid": "test-duid",
-            "guest": 0,
-            "hostname": "test-device",
-            "ipaddress": "192.168.1.100",
-            "lease": 0,
-            "link": "wireless",
-            "macaddress": "aa:bb:cc:dd:ee:ff",
-            "type": "wireless",
-            "firstseen": "2025-10-27T21:14:33+0100",
-            "lastseen": 1730052873,
-            "serialNumber": "",
-            "ip6address": [],
-            "ethernet": {
-                "physicalport": 0,
-                "logicalport": 0,
-                "speed": 0,
-                "mode": "auto",
-            },
-            "wireless": {
-                "wexindex": 0,
-                "static": 0,
-                "band": "2.4GHz",
-                "txUsage": 0,
-                "rxUsage": 0,
-                "estimatedRate": 0,
-                "rssi0": 0,
-                "mcs": 0,
-                "rate": 0,
-            },
-            "wirelessByBand": [],
-            "plc": {
-                "rxphyrate": "100Mbps",
-                "txphyrate": "100Mbps",
-                "associateddevice": 0,
-                "interface": 0,
-                "ethernetspeed": 0,
-            },
-            "informations": {
-                "type": "computer",
-                "manufacturer": "Test Manufacturer",
-                "model": "Test Model",
-                "icon": "computer",
-                "operatingSystem": "Test OS",
-                "version": "1.0",
-            },
-            "parentalcontrol": {
-                "enable": 0,
-                "status": "enabled",
-                "statusRemaining": 0,
-                "statusUntil": 0,
-            },
-            "ping": {
-                "average": 0,
-            },
-            "scan": {
-                "services": [],
-            },
+        router = Router(**data)
+        assert router.main.version is None
+
+    def test_router_missing_required_field(self) -> None:
+        """Test that missing required fields raise ValidationError."""
+        data = {
+            "now": "2025-11-07T13:40:00+0100",
+            "status": 1,
+            "numberofboots": 10,
+            "modelname": "Test",
+            "modelclass": "Test",
+            "optimisation": 1,
+            "user_configured": 1,
+            "serialnumber": "123",
+            "display": {"luminosity": 0, "luminosity_extender": 0, "state": ""},
+            # Missing: main, reco, running, spl, tpl, ldr1, ldr2
+            "uptime": 0,
+            "lastFactoryReset": 0,
+            "using": {"ipv4": 1, "ipv6": 1, "ftth": 1, "adsl": 0, "vdsl": 0},
+            "isCertified": 1,
         }
 
-    @pytest.fixture
-    def sample_wan_stats_data(self) -> dict:
-        """Fixture providing sample WAN stats data."""
-        return {
-            "rx": {
-                "packets": 104522008,
-                "bytes": 130580798930,
-                "packetserrors": 0,
-                "packetsdiscards": 0,
-                "occupation": 0,
-                "bandwidth": 29,
-                "maxBandwidth": 1000000,
-                "contractualBandwidth": 8000000,
-            },
-            "tx": {
-                "packets": 11135558,
-                "bytes": 5471690248,
-                "packetserrors": 0,
-                "packetsdiscards": 0,
-                "occupation": 0,
-                "bandwidth": 10,
-                "maxBandwidth": 1000000,
-                "contractualBandwidth": 1000000,
-            },
-        }
+        with pytest.raises(ValidationError) as exc_info:
+            Router(**data)
+        # Verify it's actually a validation error with proper structure
+        assert exc_info.value.error_count() >= 1
 
-    def test_device_model(self, sample_device_data: dict) -> None:
-        """Test Device model with example data."""
-        device = Router(**sample_device_data)  # type: ignore[arg-type]
 
-        assert device.modelname == "F@st5696b"
-        assert device.serialnumber == "123456789012345"
-        assert device.status == 1
-        assert device.uptime == 404347
-        assert isinstance(device.now, datetime)
-        assert device.using.ipv4 == 1
-        assert device.using.ftth == 1
+class TestHostModel:
+    """Test suite for Host model."""
 
-    def test_host_model(self, sample_host_data: dict) -> None:
-        """Test Host model with complete data."""
-        host = Host(**sample_host_data)  # type: ignore[arg-type]
-
-        assert host.id == 1
-        assert host.active == 1
-        assert host.macaddress == "aa:bb:cc:dd:ee:ff"
-        assert host.hostname == "test-device"
-        assert host.ipaddress == "192.168.1.100"
-        assert host.duid == "test-duid"
-        assert host.serialNumber is None  # Empty string converted to None
-
-    def test_wan_stats_model(self, sample_wan_stats_data: dict) -> None:
-        """Test WAN stats model with example data."""
-        wan_stats = WANIPStats(**sample_wan_stats_data)  # type: ignore[arg-type]
-
-        assert wan_stats.rx.bandwidth == 29
-        assert wan_stats.tx.bandwidth == 10
-        assert wan_stats.rx.packets == 104522008
-        assert wan_stats.tx.packets == 11135558
-        assert wan_stats.rx.bytes == 130580798930
-        assert wan_stats.tx.bytes == 5471690248
-
-    def test_hosts_list_minimal(self, sample_host_data: dict) -> None:
-        """Test Host model with minimal data for list usage."""
-        # Create minimal version by removing optional fields
-        minimal_data = sample_host_data.copy()
-        minimal_data["hostname"] = ""
-
-        host = Host(**minimal_data)  # type: ignore[arg-type]
-
-        assert host.id == 1
-        assert host.active == 1
-        assert host.macaddress == "aa:bb:cc:dd:ee:ff"
-        assert host.type == "wireless"
-        assert host.hostname is None  # Empty string converted to None
-        assert host.duid == "test-duid"
-        assert host.serialNumber is None  # Empty string converted to None
-
-    def test_device_with_empty_strings_converted_to_none(
-        self, sample_device_data: dict
+    @pytest.mark.parametrize(
+        "host_fixture,expected_id,expected_active,expected_link,expected_hostname",
+        [
+            ("sample_inactive_host", 1, False, "Wifi 5", None),
+            ("sample_active_dhcp_host", 5, True, "Wifi 2.4", "office-printer"),
+            ("sample_ethernet_host", 10, True, "Ethernet", "home-server"),
+        ],
+    )
+    def test_host_creation(
+        self,
+        request: pytest.FixtureRequest,
+        host_fixture: str,
+        expected_id: int,
+        expected_active: bool,
+        expected_link: str,
+        expected_hostname: str | None,
     ) -> None:
-        """Test Device model handles empty strings converted to None."""
-        device = Router(**sample_device_data)  # type: ignore[arg-type]
+        """Test creating Host instances with various connection types."""
+        host_data = request.getfixturevalue(host_fixture)
+        host = Host(**host_data)
+        assert host.id == expected_id
+        assert host.active is expected_active
+        assert host.link == expected_link
+        assert host.hostname == expected_hostname
 
-        # Check that empty strings were converted to None
-        assert device.spl.version is None
-        assert device.tpl.version is None
+    def test_active_dhcp_host_with_ipv6(
+        self, sample_active_dhcp_host: dict[str, Any]
+    ) -> None:
+        """Test creating an active DHCP host with IPv6 addresses."""
+        host = Host(**sample_active_dhcp_host)
+        assert host.type == "DHCP"
+        assert len(host.ip6address) == 2
+        assert host.ip6address[0].ipaddress == "fe80::aabb:ccff:fedd:ee05"
+        assert host.wireless is not None
+        assert host.wireless.band == 2.4
+        assert host.wireless.rssi0 == -52
 
-        # Check that non-empty strings remain as strings
-        assert device.modelname == "F@st5696b"
-        assert device.main.version == "25.5.28"
-        assert device.ldr1.version == "4.4.20"
+    def test_ethernet_host_connectivity(
+        self, sample_ethernet_host: dict[str, Any]
+    ) -> None:
+        """Test host connected via Ethernet with speed info."""
+        host = Host(**sample_ethernet_host)
+        assert host.me is True
+        assert host.ethernet is not None
+        assert host.ethernet.speed == 2500
+        assert host.ethernet.mode == "Full"
 
-    def test_wan_stats_validation(self) -> None:
-        """Test WANStats validation."""
-        stats_data = {
-            "packets": 100,
-            "bytes": 1000,
+    def test_host_wireless_by_band(
+        self, sample_active_dhcp_host: dict[str, Any]
+    ) -> None:
+        """Test wireless per-band information."""
+        host = Host(**sample_active_dhcp_host)
+        assert len(host.wirelessByBand) == 1
+        assert host.wirelessByBand[0].band == 2.4
+        assert host.wirelessByBand[0].rate == 72
+
+
+class TestWANStatsModel:
+    """Test suite for WAN statistics models."""
+
+    def test_wan_stats_creation(self, sample_wan_stats_data: dict[str, Any]) -> None:
+        """Test creating WANIPStats instance."""
+        stats = WANIPStats(**sample_wan_stats_data["wan"]["ip"]["stats"])
+        assert stats.tx.packets == 400000
+        assert stats.rx.packets == 500000
+
+    def test_wan_stats_field_validation(self) -> None:
+        """Test field validation for WANStats."""
+        data = {
+            "packets": 1000,
+            "bytes": 500000,
             "packetserrors": 0,
             "packetsdiscards": 0,
-            "occupation": 0,
-            "bandwidth": 10,
-            "maxBandwidth": 100,
-            "contractualBandwidth": 50,
+            "occupation": 50,
+            "bandwidth": 100,
+            "maxBandwidth": 1000,
+            "contractualBandwidth": 500,
         }
 
-        stats = WANStats(**stats_data)  # type: ignore[arg-type]
-        assert stats.packets == 100
-        assert stats.bytes == 1000
-        assert stats.bandwidth == 10
+        stats = WANStats(**data)
+        assert stats.packets == 1000
+        assert stats.occupation == 50
 
-    def test_empty_string_to_none_conversion(self) -> None:
-        """Test that empty strings are converted to None by model_validator."""
-        device_data = {
-            "now": "2025-10-27T21:14:33+0100",
-            "status": 1,
-            "numberofboots": 10,
-            "modelname": "F@st5696b",
-            "modelclass": "F5696b",
-            "optimisation": 1,
-            "user_configured": 1,
-            "serialnumber": "123456789012345",
-            "display": {
-                "luminosity": 2,
-                "luminosity_extender": 100,
-                "state": ".",
-            },
-            "main": {"version": "25.5.28", "date": "2025-09-25T14:38:50Z"},
-            "reco": {"version": "25.5.28", "date": "2025-09-25T14:29:16Z"},
-            "running": {
-                "version": "25.5.28",
-                "date": "2025-09-25T14:38:16+0000",
-            },
-            "spl": {"version": ""},
-            "tpl": {"version": ""},
-            "ldr1": {"version": "4.4.20"},
-            "ldr2": {"version": "4.4.20"},
-            "firstusedate": "2025-07-23T06:30:42Z",
-            "uptime": 404347,
-            "lastFactoryReset": 0,
-            "using": {"ipv4": 1, "ipv6": 1, "ftth": 1, "adsl": 0, "vdsl": 0},
-            "isCellularEnable": 1,
-            "newihm": 1,
-            "newihmCdc": 1,
+    @pytest.mark.parametrize(
+        "invalid_field,invalid_value,field_name",
+        [
+            ("occupation", 150, "occupation"),  # > 100
+            ("packets", -100, "packets"),  # < 0
+            ("bytes", -50, "bytes"),  # < 0
+        ],
+    )
+    def test_wan_stats_invalid_field(
+        self, invalid_field: str, invalid_value: int, field_name: str
+    ) -> None:
+        """Test that invalid field values raise ValidationError."""
+        data = {
+            "packets": 1000,
+            "bytes": 500000,
+            "packetserrors": 0,
+            "packetsdiscards": 0,
+            "occupation": 50,
+            "bandwidth": 100,
+            "maxBandwidth": 1000,
+            "contractualBandwidth": 500,
+        }
+        data[invalid_field] = invalid_value
+
+        with pytest.raises(ValidationError) as exc_info:
+            WANStats(**data)
+
+        errors = exc_info.value.errors()
+        assert any(error["loc"][0] == field_name for error in errors)
+
+    def test_wan_stats_missing_required_field(self) -> None:
+        """Test that missing required fields raise ValidationError."""
+        data = {
+            "packets": 1000,
+            # Missing: bytes, packetserrors, packetsdiscards, etc.
+            "occupation": 50,
         }
 
-        device = Router(**device_data)  # type: ignore[arg-type]
-
-        # Check that empty strings were converted to None
-        assert device.spl.version is None
-        assert device.tpl.version is None
-
-        # Check that non-empty strings remain as strings
-        assert device.modelname == "F@st5696b"
-        assert device.main.version == "25.5.28"
-        assert device.ldr1.version == "4.4.20"
+        with pytest.raises(ValidationError) as exc_info:
+            WANStats(**data)
+        # Should have multiple validation errors for missing fields
+        assert exc_info.value.error_count() >= 1

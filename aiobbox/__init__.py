@@ -2,7 +2,16 @@
 
 __version__ = "0.2.0"
 
-from .client import BboxApi, BboxApiError, BboxAuthError
+from .client import BboxApi
+from .exceptions import (
+    BboxApiError,
+    BboxAuthError,
+    BboxInvalidCredentialsError,
+    BboxRateLimitError,
+    BboxSessionExpiredError,
+    BboxTimeoutError,
+    BboxUnauthenticatedError,
+)
 from .models import (
     Host,
     Router,
@@ -14,6 +23,11 @@ __all__ = [
     "BboxApi",
     "BboxApiError",
     "BboxAuthError",
+    "BboxInvalidCredentialsError",
+    "BboxRateLimitError",
+    "BboxSessionExpiredError",
+    "BboxTimeoutError",
+    "BboxUnauthenticatedError",
     "Router",
     "Host",
     "Hosts",
