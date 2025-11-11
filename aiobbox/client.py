@@ -25,7 +25,6 @@ _LOGGER = logging.getLogger(__name__)
 class BboxApi:
     """Async Python API wrapper for Bbox routers."""
 
-    # Class-level constants
     DEFAULT_BASE_URL: ClassVar[str] = "https://mabbox.bytel.fr/api/v1/"
     DEFAULT_TIMEOUT: ClassVar[int] = 10
 
