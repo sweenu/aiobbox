@@ -170,9 +170,9 @@ class DeviceInformation(CustomBaseModel):
 
     type: CleanString = Field(description="Device type")
     manufacturer: CleanString | None = Field(None, description="Manufacturer")
-    model: CleanString = Field(description="Device model")
+    model: CleanString | None = Field(None, description="Device model")
     icon: str = Field(description="Icon identifier")
-    operatingSystem: CleanString = Field(description="OS type")
+    operatingSystem: CleanString | None = Field(None, description="OS type")
     version: CleanString | None = Field(None, description="OS version")
 
 
